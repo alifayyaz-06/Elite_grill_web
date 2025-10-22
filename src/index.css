@@ -1,0 +1,22 @@
+/* Hide map containers when they appear inside the cart drawer to avoid showing maps in the mini-cart */
+.cart-drawer .leaflet-container,
+.cart-drawer #google-maps-script,
+.cart-drawer .gm-style,
+.cart-drawer .gm-style > div {
+  display: none !important;
+}
+
+/* Additionally hide any map containers or overlays that may be injected outside
+	 the drawer while the cart is open. Some map libraries attach overlays to the
+	 document body or other top-level nodes; toggling `body.cart-open` covers
+	 those cases and prevents maps from showing while the cart is visible. */
+body.cart-open .leaflet-container,
+body.cart-open .gm-style,
+body.cart-open #google-maps-script,
+body.cart-open .gm-ui-hover-effect,
+body.cart-open .gm-style > div {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+}
