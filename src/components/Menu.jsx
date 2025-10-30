@@ -6,27 +6,28 @@ import { useLocation } from "react-router-dom";
 import fullMenu from "../data/fullMenu";
 
 export default function Menu({ onAddToCart, cartItems = [] }) {
-  const [activeCategory, setActiveCategory] = useState("pizza");
+  // 👇 Generate categories dynamically from fullMenu keys
+  const dynamicCategories = Object.keys(fullMenu).map((key) => ({
+    id: key,
+    name: key.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()), // Capitalize words
+  }));
+
+  const [activeCategory, setActiveCategory] = useState(
+    dynamicCategories[0]?.id || ""
+  );
   const [activeSub, setActiveSub] = useState("all");
   const [optionsModalItem, setOptionsModalItem] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedExtras, setSelectedExtras] = useState([]);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [isScrolling, setIsScrolling] = useState(false);
   const sectionRefs = useRef({});
   const categoryNavRef = useRef(null);
   const indicatorRef = useRef(null);
+  const scrollTimeoutRef = useRef(null);
   const location = useLocation();
 
-  const categories = [
-    { id: "pizza", name: "Pizza" },
-    { id: "burgers", name: "Burgers" },
-    { id: "pasta", name: "Pasta" },
-    { id: "salads", name: "Salads" },
-    { id: "desserts", name: "Desserts" },
-    { id: "drinks", name: "Drinks" },
-    { id: "hotsellers", name: "Hot Sellers" },
-  ];
-
+  const categories = dynamicCategories;
   const menuItems = fullMenu;
 
   const getAvailableSubFilters = (categoryId) => {
@@ -41,7 +42,9 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 250;
+      if (isScrolling) return;
+
+      const scrollPosition = window.scrollY + 200;
       for (let i = categories.length - 1; i >= 0; i--) {
         const category = categories[i];
         const section = sectionRefs.current[category.id];
@@ -55,19 +58,33 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [categories, isScrolling]);
 
   const scrollToCategory = (categoryId) => {
     setActiveCategory(categoryId);
     setActiveSub("all");
+    setIsScrolling(true);
+
     const section = sectionRefs.current[categoryId];
     if (section) {
+      const yOffset = -220;
+      const y =
+        section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
       window.scrollTo({
-        top: section.offsetTop - 150,
+        top: y,
         behavior: "smooth",
       });
     }
-    // move indicator after state update (use timeout to wait for DOM update)
+
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    scrollTimeoutRef.current = setTimeout(() => {
+      setIsScrolling(false);
+    }, 1000);
+
     setTimeout(() => moveIndicatorToActive(), 50);
   };
 
@@ -76,13 +93,6 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
     const buttons = Array.from(
       categoryNavRef.current.querySelectorAll("button")
     );
-    const activeBtn = buttons.find(
-      (b) =>
-        b.className.includes("scale-105") ||
-        b.textContent.trim() ===
-          categories.find((c) => c.id === activeCategory)?.name
-    );
-    // fallback: find by data-attr
     const idx = categories.findIndex((c) => c.id === activeCategory);
     const btn = buttons[idx] || buttons[0];
     if (!btn) return;
@@ -101,11 +111,10 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
     return () => window.removeEventListener("resize", onResize);
   }, [activeCategory]);
 
-  // Size selection for pizzas
   const sizeOptions = [
     { label: "Small", key: "small", multiplier: 0.8 },
-    { label: "Medium", key: "medium", multiplier: 1.0 },
-    { label: "Large", key: "large", multiplier: 1.25 },
+    { label: "Medium", key: "medium", multiplier: 1.33 },
+    { label: "Large", key: "large", multiplier: 1.8 },
   ];
 
   const drinkVolumes = [
@@ -114,7 +123,17 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
   ];
 
   const defaultExtras = {
-    pizza: [
+    "Classic-Pizzas": [
+      { key: "extra-cheese", label: "Extra Cheese", price: 79 },
+      { key: "extra-chicken", label: "Extra Chicken", price: 149 },
+      { key: "extra-olives", label: "Olives", price: 59 },
+    ],
+    "Signature-Pizza": [
+      { key: "extra-cheese", label: "Extra Cheese", price: 79 },
+      { key: "extra-chicken", label: "Extra Chicken", price: 149 },
+      { key: "extra-olives", label: "Olives", price: 59 },
+    ],
+    "Elite Special Pizzas": [
       { key: "extra-cheese", label: "Extra Cheese", price: 79 },
       { key: "extra-chicken", label: "Extra Chicken", price: 149 },
       { key: "extra-olives", label: "Olives", price: 59 },
@@ -130,10 +149,32 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
   };
 
   const handleAddClicked = (categoryId, item) => {
-    // show options modal for categories that need sizing/extra selection
-    const needOptions = ["pizza", "drinks", "pasta", "burgers"];
-    if (needOptions.includes(categoryId)) {
-      setSelectedSize(null);
+    console.log("Category ID:", categoryId);
+    console.log("Item:", item);
+
+    const catLower = categoryId.toLowerCase();
+    const isPizza = catLower.includes("pizza");
+    const isPasta = catLower.includes("pasta");
+    const isDrinks = catLower.includes("drink");
+    const isBurgers = catLower.includes("burger");
+
+    const needsOptions = isPizza || isDrinks || isPasta || isBurgers;
+
+    console.log("Needs Options?", needsOptions, {
+      isPizza,
+      isPasta,
+      isDrinks,
+      isBurgers,
+    });
+
+    if (needsOptions) {
+      if (isPizza || isPasta) {
+        setSelectedSize("small");
+      } else if (isDrinks) {
+        setSelectedSize("reg");
+      } else if (isBurgers) {
+        setSelectedSize(null);
+      }
       setSelectedExtras([]);
       setSelectedQuantity(1);
       setOptionsModalItem({ ...item, category: categoryId });
@@ -145,36 +186,40 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
   const closeOptionsModal = () => setOptionsModalItem(null);
 
   const toggleExtra = (extraKey) => {
-    setSelectedExtras((prev) => {
-      if (prev.includes(extraKey)) return prev.filter((p) => p !== extraKey);
-      return [...prev, extraKey];
-    });
+    setSelectedExtras((prev) =>
+      prev.includes(extraKey)
+        ? prev.filter((p) => p !== extraKey)
+        : [...prev, extraKey]
+    );
   };
 
   const handleConfirmOptions = () => {
     if (!optionsModalItem) return;
     const item = optionsModalItem;
-
-    // determine size/volume multiplier and label
     let multiplier = 1;
     let sizeLabel = null;
-    if (item.category === "pizza" || item.category === "pasta") {
-      const opt =
-        sizeOptions.find((o) => o.key === selectedSize) || sizeOptions[1];
-      multiplier = opt.multiplier;
-      sizeLabel = opt.label;
-    } else if (item.category === "drinks") {
-      const opt =
-        drinkVolumes.find((o) => o.key === selectedSize) || drinkVolumes[0];
-      multiplier = opt.multiplier;
-      sizeLabel = opt.label;
+
+    const catLower = item.category?.toLowerCase() || "";
+    const isPizza = catLower.includes("pizza");
+
+    if (isPizza || catLower.includes("pasta")) {
+      const opt = sizeOptions.find((o) => o.key === selectedSize);
+      if (opt) {
+        multiplier = opt.multiplier;
+        sizeLabel = opt.label;
+      }
+    } else if (catLower.includes("drink")) {
+      const opt = drinkVolumes.find((o) => o.key === selectedSize);
+      if (opt) {
+        multiplier = opt.multiplier;
+        sizeLabel = opt.label;
+      }
     }
 
     const extrasList = (defaultExtras[item.category] || []).filter((e) =>
       selectedExtras.includes(e.key)
     );
     const extrasTotal = extrasList.reduce((s, e) => s + e.price, 0);
-
     const basePrice = Math.round(item.price * multiplier);
     const finalPrice = basePrice + extrasTotal;
 
@@ -198,45 +243,66 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
   };
 
   return (
-    <section className="bg-gray-50 pt-0 sm:pt-0 pb-8">
+    <section className="bg-gray-50 pt-0 sm:pt-0 pb-12">
+      <style jsx>{`
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap");
+
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+
+        * {
+          font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+            sans-serif;
+        }
+
+        .category-title {
+          font-family: "Poppins", sans-serif;
+          letter-spacing: -0.02em;
+        }
+      `}</style>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Category Navigation */}
-        <div className="sticky top-16 z-30 bg-white border-b border-gray-200 pb-3">
-          <div className="relative">
+        <div className="sticky top-16 z-40 bg-white shadow-md">
+          <div className="relative bg-white">
             <div
               ref={categoryNavRef}
-              className="flex gap-3 overflow-x-auto py-3 px-4 scrollbar-hide snap-x snap-mandatory items-center md:justify-center"
+              className="flex gap-3 overflow-x-auto py-5 px-4 scrollbar-hide snap-x snap-mandatory items-center border-b border-gray-200"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+                WebkitOverflowScrolling: "touch",
+              }}
             >
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => scrollToCategory(category.id)}
-                  className={`snap-center px-5 py-2.5 rounded-full font-semibold whitespace-nowrap transition-all duration-300 ${
+                  className={`snap-center px-6 py-3 rounded-full font-semibold whitespace-nowrap transition-all duration-300 flex-shrink-0 text-sm tracking-wide ${
                     activeCategory === category.id
                       ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg transform scale-105"
-                      : "bg-white/70 text-gray-700 hover:bg-white/90 ring-1 ring-gray-100"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
                   }`}
                 >
                   {category.name}
                 </button>
               ))}
             </div>
+          </div>
 
-            {/* Underline indicator */}
-            <div
-              ref={indicatorRef}
-              className="category-indicator absolute bottom-0 left-0 h-0.5 bg-orange-500 rounded-full transition-all duration-300"
-            />
-
-            <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-hide md:justify-center">
+          <div className="bg-white border-b border-gray-100">
+            <div className="flex gap-2 px-4 py-4 overflow-x-auto scrollbar-hide items-center justify-center">
               {getAvailableSubFilters(activeCategory).map((sub) => (
                 <button
                   key={sub.id}
                   onClick={() => setActiveSub(sub.id)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 ${
+                  className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 flex-shrink-0 ${
                     activeSub === sub.id
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white"
-                      : "bg-white/80 text-gray-700 hover:bg-white"
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md transform scale-105"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
                   }`}
                 >
                   {sub.name}
@@ -246,8 +312,7 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
           </div>
         </div>
 
-        {/* Menu Items */}
-        {categories.map((category) => {
+        {categories.map((category, idx) => {
           const items = menuItems[category.id] || [];
           const filteredItems =
             activeCategory === category.id
@@ -264,49 +329,79 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
               key={category.id}
               id={category.id}
               ref={(el) => (sectionRefs.current[category.id] = el)}
-              className="mb-12 sm:mb-16"
+              className={`scroll-mt-56 ${idx === 0 ? "mt-8" : "mt-16"} mb-16`}
             >
-              <h3 className="text-2xl font-bold mb-6 flex items-center">
-                {category.name}
-                {category.id === "hotsellers" && (
-                  <Flame className="ml-2 text-red-500" size={28} />
-                )}
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="mb-8">
+                <h3 className="category-title text-3xl sm:text-4xl font-bold text-gray-900 flex items-center capitalize tracking-tight">
+                  {category.name}
+                  {category.id === "hotsellers" && (
+                    <Flame className="ml-3 text-red-500" size={32} />
+                  )}
+                </h3>
+                <div className="mt-2 h-1 w-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"></div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
                 {filteredItems.map((item) => {
                   const inCart = cartItems.find((i) => i.id === item.id);
                   return (
                     <div
                       key={item.id}
-                      className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition"
+                      className="group bg-white rounded-2xl shadow-sm hover:shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 border border-gray-100"
                     >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-32 object-cover"
-                      />
-                      <div className="p-4">
-                        <h3 className="font-bold text-sm">{item.name}</h3>
-                        <p className="text-xs text-gray-500">
+                      <div className="relative overflow-hidden">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-36 sm:h-40 object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        {item.popular && (
+                          <div className="absolute top-2 left-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-2.5 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                            <Flame size={12} />
+                            Popular
+                          </div>
+                        )}
+                        {item.spicy && (
+                          <div className="absolute top-2 right-2 bg-red-600 text-white px-2.5 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                            🌶️ Spicy
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4 sm:p-5">
+                        <h3 className="font-bold text-sm sm:text-base mb-2 text-gray-900 line-clamp-1 tracking-tight">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-gray-600 mb-3 line-clamp-2 leading-relaxed">
                           {item.description}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 my-2">
-                          <Star
-                            size={12}
-                            className="text-yellow-500 fill-yellow-500"
-                          />
-                          {item.rating}
-                          <Clock size={12} /> {item.time}
+                        <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
+                          <div className="flex items-center gap-1.5">
+                            <Star
+                              size={13}
+                              className="text-yellow-500 fill-yellow-500"
+                            />
+                            <span className="font-semibold text-gray-700">
+                              {item.rating}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Clock size={13} className="text-gray-400" />
+                            <span className="font-medium">{item.time}</span>
+                          </div>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-orange-500 font-bold">
-                            Rs {item.price.toLocaleString("en-PK")}
-                          </span>
+                          <div>
+                            <span className="text-xs text-gray-500 font-medium">
+                              Starting from
+                            </span>
+                            <div className="text-orange-600 font-bold text-base sm:text-lg tracking-tight">
+                              Rs {item.price.toLocaleString("en-PK")}
+                            </div>
+                          </div>
                           <button
                             onClick={() => handleAddClicked(category.id, item)}
-                            className="px-3 py-1 bg-orange-500 text-white text-xs rounded-lg flex items-center gap-1"
+                            className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs sm:text-sm rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all duration-200 font-semibold"
                           >
-                            <Plus size={14} />
+                            <Plus size={16} />
                             {inCart ? `(${inCart.quantity})` : "Add"}
                           </button>
                         </div>
@@ -320,32 +415,34 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
         })}
       </div>
 
-      {/* Options Modal (sizes/volumes/extras) */}
       {optionsModalItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-            <h3 className="text-lg font-bold mb-2">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-5 text-gray-900 tracking-tight">
               Options — {optionsModalItem.name}
             </h3>
-            <div className="space-y-3">
-              {/* Size / Volume */}
-              {(optionsModalItem.category === "pizza" ||
-                optionsModalItem.category === "pasta") && (
+            <div className="space-y-5">
+              {(optionsModalItem.category?.toLowerCase().includes("pizza") ||
+                optionsModalItem.category?.toLowerCase().includes("pasta")) && (
                 <div>
-                  <div className="text-sm text-gray-600 mb-2">Choose Size</div>
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
+                    Choose Size *
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
                     {sizeOptions.map((opt) => (
                       <button
                         key={opt.key}
                         onClick={() => setSelectedSize(opt.key)}
-                        className={`w-full border rounded-lg px-4 py-3 text-left ${
+                        className={`w-full border-2 rounded-lg px-4 py-3.5 text-left transition-all ${
                           selectedSize === opt.key
                             ? "border-orange-500 bg-orange-50"
-                            : "hover:border-orange-500 hover:bg-orange-50"
+                            : "border-gray-200 hover:border-orange-300 hover:bg-orange-50"
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold">{opt.label}</span>
+                          <span className="font-semibold text-gray-800">
+                            {opt.label}
+                          </span>
                           <span className="text-orange-600 font-bold">
                             Rs{" "}
                             {Math.round(
@@ -359,24 +456,26 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
                 </div>
               )}
 
-              {optionsModalItem.category === "drinks" && (
+              {optionsModalItem.category?.toLowerCase().includes("drink") && (
                 <div>
-                  <div className="text-sm text-gray-600 mb-2">
+                  <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
                     Choose Volume
                   </div>
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-1 gap-3">
                     {drinkVolumes.map((v) => (
                       <button
                         key={v.key}
                         onClick={() => setSelectedSize(v.key)}
-                        className={`w-full border rounded-lg px-4 py-3 text-left ${
+                        className={`w-full border-2 rounded-lg px-4 py-3.5 text-left transition-all ${
                           selectedSize === v.key
                             ? "border-orange-500 bg-orange-50"
-                            : "hover:border-orange-500 hover:bg-orange-50"
+                            : "border-gray-200 hover:border-orange-300 hover:bg-orange-50"
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold">{v.label}</span>
+                          <span className="font-semibold text-gray-800">
+                            {v.label}
+                          </span>
                           <span className="text-orange-600 font-bold">
                             Rs{" "}
                             {Math.round(
@@ -390,69 +489,75 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
                 </div>
               )}
 
-              {/* Extras */}
-              {(optionsModalItem.category === "pizza" ||
-                optionsModalItem.category === "pasta" ||
-                optionsModalItem.category === "burgers") && (
-                <div>
-                  <div className="text-sm text-gray-600 mb-2">Extras</div>
-                  <div className="grid grid-cols-1 gap-2">
-                    {(defaultExtras[optionsModalItem.category] || []).map(
-                      (ex) => (
+              {(optionsModalItem.category?.toLowerCase().includes("pizza") ||
+                optionsModalItem.category?.toLowerCase().includes("pasta") ||
+                optionsModalItem.category?.toLowerCase().includes("burger")) &&
+                defaultExtras[optionsModalItem.category] && (
+                  <div>
+                    <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
+                      Add Extras (Optional)
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      {defaultExtras[optionsModalItem.category].map((ex) => (
                         <label
                           key={ex.key}
-                          className="flex items-center gap-3 border rounded-lg p-3"
+                          className="flex items-center gap-3 border-2 border-gray-200 rounded-lg p-3.5 cursor-pointer hover:bg-gray-50 hover:border-orange-300 transition-all"
                         >
                           <input
                             type="checkbox"
                             checked={selectedExtras.includes(ex.key)}
                             onChange={() => toggleExtra(ex.key)}
+                            className="w-5 h-5 text-orange-500 rounded focus:ring-orange-500"
                           />
                           <div className="flex-1">
-                            <div className="font-medium">{ex.label}</div>
-                            <div className="text-xs text-gray-500">
-                              Rs {ex.price.toLocaleString("en-PK")}
+                            <div className="font-semibold text-gray-900">
+                              {ex.label}
+                            </div>
+                            <div className="text-sm text-gray-600 font-medium">
+                              +Rs {ex.price.toLocaleString("en-PK")}
                             </div>
                           </div>
                         </label>
-                      )
-                    )}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Quantity */}
-              <div className="flex items-center gap-3">
-                <div className="text-sm text-gray-600">Quantity</div>
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between py-3 border-t border-gray-100">
+                <div className="text-sm font-bold text-gray-800 tracking-wide">
+                  Quantity
+                </div>
+                <div className="flex items-center gap-4">
                   <button
                     onClick={() =>
                       setSelectedQuantity((q) => Math.max(1, q - 1))
                     }
-                    className="px-3 py-1 border rounded"
+                    className="w-10 h-10 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-100 font-bold text-lg transition-colors"
                   >
                     -
                   </button>
-                  <div className="px-3">{selectedQuantity}</div>
+                  <div className="w-12 text-center font-bold text-lg">
+                    {selectedQuantity}
+                  </div>
                   <button
                     onClick={() => setSelectedQuantity((q) => q + 1)}
-                    className="px-3 py-1 border rounded"
+                    className="w-10 h-10 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-100 font-bold text-lg transition-colors"
                   >
                     +
                   </button>
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3 pt-3">
                 <button
                   onClick={closeOptionsModal}
-                  className="flex-1 py-3 rounded-lg border"
+                  className="flex-1 py-3.5 rounded-lg border-2 border-gray-300 font-semibold hover:bg-gray-50 transition-all text-gray-700"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmOptions}
-                  className="flex-1 py-3 rounded-lg bg-orange-500 text-white"
+                  className="flex-1 py-3.5 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                 >
                   Add to cart
                 </button>

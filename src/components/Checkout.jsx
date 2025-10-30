@@ -21,6 +21,7 @@ export default function Checkout({ cartItems = [], onClearCart, onAddToCart }) {
   const [touched, setTouched] = useState({ name: false, phone: false });
 
   const total = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const MIN_ORDER = 500;
 
   // Recommendations removed from Checkout page per user request
 
@@ -90,6 +91,10 @@ export default function Checkout({ cartItems = [], onClearCart, onAddToCart }) {
   }, [address]);
 
   const handlePlaceOrder = () => {
+    if (total < MIN_ORDER) {
+      toast.error(`Minimum order is Rs ${MIN_ORDER}`);
+      return;
+    }
     if (!customer.name || !customer.phone) {
       toast.error("Please enter name and phone.");
       return;
@@ -113,6 +118,10 @@ export default function Checkout({ cartItems = [], onClearCart, onAddToCart }) {
   };
 
   const handleWhatsAppOrder = () => {
+    if (total < MIN_ORDER) {
+      toast.error(`Minimum order is Rs ${MIN_ORDER}`);
+      return;
+    }
     const number = import.meta.env.VITE_WHATSAPP_NUMBER || "923120644468"; // e.g., 92300XXXXXXX
     const lines = [
       "New Order via WhatsApp:",
@@ -177,7 +186,9 @@ export default function Checkout({ cartItems = [], onClearCart, onAddToCart }) {
                 placeholder="Your name"
               />
               {touched.name && !customer.name && (
-                <div className="text-sm text-red-500 mt-1">Name is required</div>
+                <div className="text-sm text-red-500 mt-1">
+                  Name is required
+                </div>
               )}
             </div>
             <div>
@@ -197,7 +208,9 @@ export default function Checkout({ cartItems = [], onClearCart, onAddToCart }) {
                 placeholder="03XXXXXXXXX"
               />
               {touched.phone && !customer.phone && (
-                <div className="text-sm text-red-500 mt-1">Phone is required</div>
+                <div className="text-sm text-red-500 mt-1">
+                  Phone is required
+                </div>
               )}
             </div>
             <div>
@@ -311,12 +324,18 @@ export default function Checkout({ cartItems = [], onClearCart, onAddToCart }) {
               Rs {total.toLocaleString("en-PK")}
             </span>
           </div>
+          {total < MIN_ORDER && (
+            <div className="text-sm text-red-600 mt-2">
+              Minimum order amount is Rs {MIN_ORDER}
+            </div>
+          )}
           {(() => {
             const needsAddress = customer.method === "delivery";
             const canPlace =
               customer.name?.toString().trim() &&
               customer.phone?.toString().trim() &&
-              (!needsAddress || address?.toString().trim());
+              (!needsAddress || address?.toString().trim()) &&
+              total >= MIN_ORDER;
             return (
               <button
                 onClick={handleWhatsAppOrder}

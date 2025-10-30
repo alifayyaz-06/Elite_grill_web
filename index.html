@@ -1,13 +1,19 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="/img/img8.png" href="/img/img8.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- prevent zooming on mobile and keep layout width fixed -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>elite_grill</title>
   </head>
   <body>
     <div id="root"></div>
+    <!-- overlay shown when device is in landscape on mobile to request portrait -->
+    <div id="rotate-overlay" aria-hidden="true"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

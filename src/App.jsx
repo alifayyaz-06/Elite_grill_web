@@ -2,64 +2,21 @@ import { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import Loading from "./components/Loading";
 import Home from "./components/Home";
 import Menu from "./components/Menu";
 import Checkout from "./components/Checkout";
 import Navbar from "./components/Navabar";
 import "./App.css";
 
-function LoadingPage() {
-  return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center z-50">
-      <div className="text-center">
-        {/* Custom Logo */}
-        <div className="relative mb-8">
-          <div className="absolute inset-0 animate-ping opacity-30">
-            <img
-              src="/img/img8.png"
-              alt="Elite Grill Logo"
-              className="w-24 h-24 mx-auto rounded-full object-cover"
-            />
-          </div>
-          <img
-            src="/img/img8.png"
-            alt="Elite Grill Logo"
-            className="w-24 h-24 mx-auto rounded-full object-cover animate-pulse shadow-2xl border-4 border-white/20"
-          />
-        </div>
-
-        {/* Brand Name */}
-        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 font-mono">
-          Elite Grill
-        </h1>
-
-        {/* Loading Spinner */}
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <Loader2 className="w-6 h-6 text-white animate-spin" />
-          <span className="text-white text-lg font-semibold">Loading...</span>
-        </div>
-
-        {/* Loading Bar */}
-        <div className="w-64 h-2 bg-white/30 rounded-full overflow-hidden mx-auto">
-          <div className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full animate-pulse"></div>
-        </div>
-
-        {/* Tagline */}
-        <p className="text-white/90 mt-6 text-sm">
-          Preparing your delicious experience...
-        </p>
-      </div>
-    </div>
-  );
-}
+// Loading is handled by src/components/Loading.jsx
 
 function App() {
   const [loading, setLoading] = useState(true);
   const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
-    // Show loading page for 2 seconds
+ 
     const timer = setTimeout(() => {
       setLoading(false);
     }, 2000);
@@ -111,7 +68,7 @@ function App() {
 
   // Show loading page
   if (loading) {
-    return <LoadingPage />;
+    return <Loading />;
   }
 
   // Show main app after loading

@@ -22,6 +22,7 @@ function CartModal({
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+  const MIN_ORDER = 500;
 
   // Recommendation strategy: prefer small add-ons from real menu (drinks, desserts, salads)
   const smallCategories = ["drinks", "desserts", "salads"];
@@ -38,7 +39,6 @@ function CartModal({
       className={`fixed inset-0 z-50 flex justify-end transition-all duration-300 
         ${isOpen ? "visible" : "invisible"}`}
     >
-      {/* Background Blur */}
       <div
         onClick={onClose}
         className={`absolute inset-0 backdrop-blur-sm transition-opacity duration-300
@@ -181,6 +181,11 @@ function CartModal({
                 Rs {cartTotal.toLocaleString("en-PK")}
               </span>
             </div>
+            {cartTotal < MIN_ORDER && (
+              <div className="text-sm text-red-600">
+                Minimum order is Rs {MIN_ORDER}
+              </div>
+            )}
             <div className="flex space-x-2">
               <button
                 onClick={onClearCart}
@@ -190,7 +195,12 @@ function CartModal({
               </button>
               <button
                 onClick={onCheckout}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors"
+                disabled={cartTotal < MIN_ORDER}
+                className={`flex-1 font-semibold py-3 rounded-lg transition-colors ${
+                  cartTotal >= MIN_ORDER
+                    ? "bg-orange-500 hover:bg-orange-600 text-white"
+                    : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                }`}
               >
                 Checkout
               </button>
@@ -211,6 +221,7 @@ function CheckoutModal({ isOpen, onClose, cartItems, onConfirm }) {
   const [loadingMap, setLoadingMap] = useState(false);
 
   const total = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const MIN_ORDER = 500;
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -385,9 +396,19 @@ function CheckoutModal({ isOpen, onClose, cartItems, onConfirm }) {
                 Rs {total.toLocaleString("en-PK")}
               </span>
             </div>
+            {total < MIN_ORDER && (
+              <div className="text-sm text-red-600 mt-2">
+                Minimum order is Rs {MIN_ORDER}
+              </div>
+            )}
             <button
               onClick={handleConfirm}
-              className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg"
+              disabled={total < MIN_ORDER}
+              className={`mt-4 w-full font-semibold py-3 rounded-lg ${
+                total >= MIN_ORDER
+                  ? "bg-orange-500 hover:bg-orange-600 text-white"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
             >
               Place Order
             </button>
@@ -499,11 +520,23 @@ export default function Navabar({
                 <User size={18} className="text-gray-600" />
                 <span className="text-gray-800">Login</span>
               </div>
-              <div className="flex items-center space-x-2 px-2 py-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+              <div
+                onClick={() => {
+                  navigate("/menu");
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center space-x-2 px-2 py-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+              >
                 <Menu size={18} className="text-gray-600" />
                 <span className="text-gray-800">Menu</span>
               </div>
-              <div className="flex items-center space-x-2 px-2 py-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+              <div
+                onClick={() => {
+                  navigate("/Footer");
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center space-x-2 px-2 py-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+              >
                 <span className="text-gray-800">Contact</span>
               </div>
             </div>

@@ -1,0 +1,231 @@
+.eg-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #fff7ed 0%, #fff1e6 40%, #ffe8d6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
+
+.eg-loading-center {
+  text-align: center;
+  max-width: 560px;
+  width: 92%;
+  padding: 28px;
+  border-radius: 20px;
+  backdrop-filter: blur(6px) saturate(120%);
+  box-shadow: 0 12px 40px rgba(16, 24, 40, 0.08);
+}
+
+.eg-burger-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.eg-burger {
+  position: relative;
+  width: 200px;
+  height: 160px;
+  perspective: 800px;
+}
+
+.layer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 22px;
+  border-radius: 12px;
+  opacity: 0;
+}
+
+.bun-top {
+  top: 8px;
+  width: 180px;
+  height: 36px;
+  border-radius: 50% 50% 28% 28%;
+  background: linear-gradient(180deg, #f8c184, #f2a64b);
+  animation: stack 1s cubic-bezier(0.2, 0.9, 0.3, 1) 0.2s forwards;
+}
+
+.sesame {
+  position: absolute;
+  width: 8px;
+  height: 5px;
+  background: #fff6d6;
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateY(-6px) rotate(-8deg);
+  animation: sesame-drop 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+.sesame.s1 {
+  left: 28%;
+  animation-delay: 0.25s;
+}
+.sesame.s2 {
+  left: 42%;
+  transform: translateY(-8px) rotate(6deg);
+  animation-delay: 0.3s;
+}
+.sesame.s3 {
+  left: 58%;
+  transform: translateY(-6px) rotate(-2deg);
+  animation-delay: 0.35s;
+}
+.sesame.s4 {
+  left: 72%;
+  transform: translateY(-5px) rotate(6deg);
+  animation-delay: 0.4s;
+}
+
+@keyframes sesame-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.85);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.lettuce {
+  top: 42px;
+  background: linear-gradient(180deg, #a7f3d0, #34d399);
+  height: 16px;
+  width: 170px;
+  border-radius: 8px;
+  transform-origin: center;
+  animation: stack 1s cubic-bezier(0.2, 0.9, 0.3, 1) 0.5s forwards;
+}
+
+.tomato {
+  top: 60px;
+  background: linear-gradient(180deg, #fb7185, #ef4444);
+  height: 14px;
+  width: 160px;
+  animation: stack 1s cubic-bezier(0.2, 0.9, 0.3, 1) 0.85s forwards;
+}
+
+.cheese {
+  top: 76px;
+  background: linear-gradient(180deg, #ffd966, #ffb84d);
+  height: 12px;
+  width: 162px;
+  border-radius: 6px;
+  animation: stack 1s cubic-bezier(0.2, 0.9, 0.3, 1) 1.1s forwards;
+}
+
+.cheese:after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -6px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  transform-origin: top;
+  animation: cheese-melt 1.2s ease-in-out 1.2s forwards;
+}
+
+@keyframes cheese-melt {
+  0% {
+    transform: scaleY(0.1);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.patty {
+  top: 92px;
+  background: linear-gradient(180deg, #4b2e24, #2b1a14);
+  height: 20px;
+  width: 165px;
+  border-radius: 10px;
+  animation: stack 1s cubic-bezier(0.2, 0.9, 0.3, 1) 1.35s forwards;
+}
+
+.bun-bottom {
+  top: 120px;
+  width: 180px;
+  height: 30px;
+  border-radius: 28% 28% 50% 50%;
+  background: linear-gradient(180deg, #f2a64b, #e08a2b);
+  animation: stack 1s cubic-bezier(0.2, 0.9, 0.3, 1) 1.6s forwards;
+}
+
+.steam {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 40px;
+  width: 120px;
+  height: 60px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.steam:before,
+.steam:after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 32px;
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.12)
+  );
+  left: 20%;
+  transform: translateY(0) rotate(-8deg);
+  filter: blur(6px);
+}
+
+.steam:after {
+  left: 60%;
+  transform: translateY(0) rotate(10deg);
+}
+
+@keyframes stack {
+  0% {
+    transform: translateX(-50%) translateY(-40px) scale(0.98) rotateX(20deg);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1) rotateX(0);
+    opacity: 1;
+  }
+}
+
+/* responsive adjustments */
+@media (max-width: 420px) {
+  .eg-burger {
+    width: 150px;
+    height: 120px;
+  }
+  .layer {
+    width: 120px;
+  }
+  .bun-top,
+  .bun-bottom {
+    width: 150px;
+  }
+}

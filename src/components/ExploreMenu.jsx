@@ -6,13 +6,14 @@ const menuItems = [
   {
     id: 1,
     name: "Cheezy Treats",
-    img: "/images/pizzas/italian-pizza.jpg",
+    img: "https://res.cloudinary.com/dfulvmass/image/upload/w_500,h_500,c_fill,q_auto,f_auto/v1761854559/240_F_34033689_j9NkSwovaFuXEXbXozTpfcoDOBQyMmZv_xybygi.jpg",
+
     categoryId: "pizza",
   },
   {
     id: 2,
-    name: "Pizza Deals",
-    img: "/images/pizzas/multi-flavour-pizza.jpg",
+    name: "Burgers",
+    img: "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/v1761819369/zinger-burger_jsampw.jpg",
     categoryId: "pizza",
   },
   {
@@ -23,8 +24,9 @@ const menuItems = [
   },
   {
     id: 4,
-    name: "Special Pizza",
-    img: "/images/pizzas/pan-n-grill-special.jpg",
+    name: "Fries",
+    img: "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/v1761851650/photo-1716973208261-46f8ee456c43_abeqgu.avif",
+
     categoryId: "pizza",
   },
   {
@@ -66,29 +68,28 @@ export default function ExploreMenu() {
           Explore Menu
         </h2>
         <button
-          className="text-orange-500 font-semibold hover:underline"
+          className="text-orange-500 font-semibold hover:underline md:pr-22 text-sm sm:text-base "
           onClick={handleViewAllClick}
         >
           VIEW ALL
         </button>
       </div>
 
-      {/* Slider / Grid */}
       <div className="relative">
         {/* Left arrow (desktop only) */}
-        <button
+        {/* <button
           onClick={() => scroll("left")}
           className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-md 
                      rounded-full p-2 z-10 hidden md:flex"
           aria-label="Scroll left"
         >
           <ChevronLeft className="w-5 h-5 text-orange-500" />
-        </button>
+        </button> */}
 
         {/* Items */}
         <div
           ref={scrollRef}
-          className="grid grid-cols-2 gap-6 sm:flex sm:gap-8 sm:overflow-x-auto sm:scroll-smooth px-2 sm:px-10 md:pl-50"
+          className="grid grid-cols-2 gap-6 sm:flex sm:gap-8 sm:overflow-x-auto sm:scroll-smooth px-2 sm:px-10 md:pl-55"
         >
           {menuItems.map((item) => (
             <div
@@ -120,14 +121,14 @@ export default function ExploreMenu() {
         </div>
 
         {/* Right arrow (desktop only) */}
-        <button
+        {/* <button
           onClick={() => scroll("right")}
           className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-md 
                      rounded-full p-2 z-10 hidden md:flex"
           aria-label="Scroll right"
         >
           <ChevronRight className="w-5 h-5 text-orange-500" />
-        </button>
+        </button> */}
       </div>
     </section>
   );
