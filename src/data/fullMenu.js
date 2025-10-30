@@ -391,7 +391,6 @@ const fullMenu = {
     },
   ],
 
-
   shawarma: [
     {
       id: "classic-shawarma",
@@ -605,73 +604,28 @@ const fullMenu = {
 
   drinks: [
     {
-      id: "soft-drink-can",
-      name: "Soft Drink (Can)",
-      description: "Choose your favorite brand",
+      id: "soft-drink",
+      name: "Soft Drink",
+      description: "Choose your favorite brand and size",
       price: 80,
       image:
         "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/v1761853662/240_F_414029990_XCARjrhzjnxaFIf1xBbNLKCQpbbUEoTc_h3p4xq.jpg",
-      rating: 4.4,
-      time: "1 min",
-      hasBrandOptions: true,
-      brands: [
-        { name: "Coca Cola", price: 80 },
-        { name: "Pepsi", price: 80 },
-        { name: "Sprite", price: 80 },
-        { name: "Fanta", price: 80 },
-      ],
-    },
-    {
-      id: "soft-drink-500ml",
-      name: "Soft Drink (500ml)",
-      description: "Choose your favorite brand",
-      price: 110,
-      image:
-        "https://res.cloudinary.com/dfulvmass/image/upload/w_500,q_auto,f_auto/v1761853659/download_hooozl.jpg",
       rating: 4.5,
       time: "1 min",
-      hasBrandOptions: true,
       popular: true,
-      brands: [
-        { name: "Coca Cola", price: 110 },
-        { name: "Pepsi", price: 110 },
-        { name: "Sprite", price: 110 },
-        { name: "Fanta", price: 110 },
-      ],
-    },
-    {
-      id: "soft-drink-1ltr",
-      name: "Soft Drink (1 Liter)",
-      description: "Choose your favorite brand",
-      price: 150,
-      image:
-        "https://res.cloudinary.com/dfulvmass/image/upload/w_500,q_auto,f_auto/v1761819542/next-cola_ec5wpj.jpg",
-      rating: 4.5,
-      time: "1 min",
       hasBrandOptions: true,
-      brands: [
-        { name: "Coca Cola", price: 150 },
-        { name: "Pepsi", price: 150 },
-        { name: "Sprite", price: 150 },
-        { name: "Fanta", price: 150 },
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Regular", key: "can", price: 80 },
+        { label: "500ml", key: "500ml", price: 110 },
+        { label: "1 Liter", key: "1ltr", price: 150 },
+        { label: "1.5 Liter", key: "1.5ltr", price: 200 },
       ],
-    },
-    {
-      id: "soft-drink-1-5ltr",
-      name: "Soft Drink (1.5 Liter)",
-      description: "Choose your favorite brand",
-      price: 200,
-      image:
-        "https://res.cloudinary.com/dfulvmass/image/upload/w_500,q_auto,f_auto/v1761819542/next-cola_ec5wpj.jpg",
-      rating: 4.6,
-      time: "1 min",
-      hasBrandOptions: true,
-      popular: true,
       brands: [
-        { name: "Coca Cola", price: 200 },
-        { name: "Pepsi", price: 200 },
-        { name: "Sprite", price: 200 },
-        { name: "Fanta", price: 200 },
+        { name: "Coca Cola" },
+        { name: "Pepsi" },
+        { name: "Sprite" },
+        { name: "Fanta" },
       ],
     },
     {
@@ -686,24 +640,19 @@ const fullMenu = {
       popular: true,
     },
     {
-      id: "water-500ml",
-      name: "Water (500ml)",
-      description: "500ml mineral water bottle",
+      id: "mineral-water",
+      name: "Mineral Water",
+      description: "Pure mineral water",
       price: 60,
       image:
         "https://res.cloudinary.com/dfulvmass/image/upload/w_500,q_auto,f_auto/v1761819542/mineral-water_eruzlj.png",
       rating: 4.2,
       time: "1 min",
-    },
-    {
-      id: "water-1-5ltr",
-      name: "Water (1.5 Liter)",
-      description: "1.5 liter mineral water bottle",
-      price: 120,
-      image:
-        "https://res.cloudinary.com/dfulvmass/image/upload/w_500,q_auto,f_auto/v1761819542/mineral-water_eruzlj.png",
-      rating: 4.2,
-      time: "1 min",
+      hasSizeOptions: true,
+      sizes: [
+        { label: "500ml", key: "500ml", price: 60 },
+        { label: "1.5 Liter", key: "1.5ltr", price: 120 },
+      ],
     },
   ],
 
@@ -725,7 +674,7 @@ const fullMenu = {
       description: "Traditional rice pudding",
       price: 200,
       image:
-        "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/v1761853420/240_F_865778331_HTJ3Rewj6qJWxBv7uVRkyeEtpFhspRNR_g7cznh.jpg",
+        "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/v1761853420/240_F_1736487247_tc7VmQttAQQcoFsN0OLpbbR4yWwANUb6_ep1e4v.jpg",
       rating: 4.6,
       time: "5-10 min",
     },
@@ -735,7 +684,7 @@ const fullMenu = {
       description: "2 pieces of sweet dumplings",
       price: 150,
       image:
-        "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/v1761853420/240_F_1736487247_tc7VmQttAQQcoFsN0OLpbbR4yWwANUb6_ep1e4v.jpg",
+        "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/v1761853420/240_F_865778331_HTJ3Rewj6qJWxBv7uVRkyeEtpFhspRNR_g7cznh.jpg",
       rating: 4.7,
       time: "5-10 min",
       popular: true,

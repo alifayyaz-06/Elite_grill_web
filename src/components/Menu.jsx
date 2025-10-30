@@ -6,10 +6,9 @@ import { useLocation } from "react-router-dom";
 import fullMenu from "../data/fullMenu";
 
 export default function Menu({ onAddToCart, cartItems = [] }) {
-  // 👇 Generate categories dynamically from fullMenu keys
   const dynamicCategories = Object.keys(fullMenu).map((key) => ({
     id: key,
-    name: key.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()), // Capitalize words
+    name: key.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
   }));
 
   const [activeCategory, setActiveCategory] = useState(
@@ -20,6 +19,7 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedExtras, setSelectedExtras] = useState([]);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [selectedBrand, setSelectedBrand] = useState(null);
   const [isScrolling, setIsScrolling] = useState(false);
   const sectionRefs = useRef({});
   const categoryNavRef = useRef(null);
@@ -149,34 +149,37 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
   };
 
   const handleAddClicked = (categoryId, item) => {
-    console.log("Category ID:", categoryId);
-    console.log("Item:", item);
-
     const catLower = categoryId.toLowerCase();
     const isPizza = catLower.includes("pizza");
     const isPasta = catLower.includes("pasta");
     const isDrinks = catLower.includes("drink");
     const isBurgers = catLower.includes("burger");
 
-    const needsOptions = isPizza || isDrinks || isPasta || isBurgers;
-
-    console.log("Needs Options?", needsOptions, {
-      isPizza,
-      isPasta,
-      isDrinks,
-      isBurgers,
-    });
+    const needsOptions =
+      isPizza || isDrinks || isPasta || isBurgers || item.hasSizeOptions;
 
     if (needsOptions) {
       if (isPizza || isPasta) {
         setSelectedSize("small");
+      } else if (isDrinks && item.hasSizeOptions && item.sizes) {
+        setSelectedSize(item.sizes[0].key);
       } else if (isDrinks) {
         setSelectedSize("reg");
       } else if (isBurgers) {
         setSelectedSize(null);
+      } else if (item.hasSizeOptions && item.sizes) {
+        setSelectedSize(item.sizes[0].key);
       }
       setSelectedExtras([]);
       setSelectedQuantity(1);
+
+      // Set default brand if item has brand options
+      if (item.hasBrandOptions && item.brands && item.brands.length > 0) {
+        setSelectedBrand(item.brands[0].name);
+      } else {
+        setSelectedBrand(null);
+      }
+
       setOptionsModalItem({ ...item, category: categoryId });
     } else {
       onAddToCart(item);
@@ -196,32 +199,43 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
   const handleConfirmOptions = () => {
     if (!optionsModalItem) return;
     const item = optionsModalItem;
-    let multiplier = 1;
+    let finalPrice = item.price;
     let sizeLabel = null;
 
     const catLower = item.category?.toLowerCase() || "";
     const isPizza = catLower.includes("pizza");
 
+    // Handle pizza/pasta sizes
     if (isPizza || catLower.includes("pasta")) {
       const opt = sizeOptions.find((o) => o.key === selectedSize);
       if (opt) {
-        multiplier = opt.multiplier;
+        finalPrice = Math.round(item.price * opt.multiplier);
         sizeLabel = opt.label;
       }
-    } else if (catLower.includes("drink")) {
+    }
+    // Handle drinks with custom sizes
+    else if (item.hasSizeOptions && item.sizes) {
+      const sizeOpt = item.sizes.find((s) => s.key === selectedSize);
+      if (sizeOpt) {
+        finalPrice = sizeOpt.price;
+        sizeLabel = sizeOpt.label;
+      }
+    }
+    // Handle old drink volume system (fallback)
+    else if (catLower.includes("drink")) {
       const opt = drinkVolumes.find((o) => o.key === selectedSize);
       if (opt) {
-        multiplier = opt.multiplier;
+        finalPrice = Math.round(item.price * opt.multiplier);
         sizeLabel = opt.label;
       }
     }
 
+    // Add extras cost
     const extrasList = (defaultExtras[item.category] || []).filter((e) =>
       selectedExtras.includes(e.key)
     );
     const extrasTotal = extrasList.reduce((s, e) => s + e.price, 0);
-    const basePrice = Math.round(item.price * multiplier);
-    const finalPrice = basePrice + extrasTotal;
+    finalPrice += extrasTotal;
 
     const extrasNames = extrasList.map((e) => e.label);
     const extrasKey = selectedExtras.join("+");
@@ -230,10 +244,10 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
       ...item,
       id: `${item.id}${selectedSize ? `-${selectedSize}` : ""}${
         extrasKey ? `-${extrasKey}` : ""
-      }`,
+      }${selectedBrand ? `-${selectedBrand.replace(/\s+/g, "-")}` : ""}`,
       name: `${item.name}${sizeLabel ? ` (${sizeLabel})` : ""}${
-        extrasNames.length ? ` + ${extrasNames.join(", ")}` : ""
-      }`,
+        selectedBrand ? ` - ${selectedBrand}` : ""
+      }${extrasNames.length ? ` + ${extrasNames.join(", ")}` : ""}`,
       price: finalPrice,
       quantity: selectedQuantity,
     };
@@ -419,9 +433,10 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold mb-5 text-gray-900 tracking-tight">
-              Options — {optionsModalItem.name}
+              Customize — {optionsModalItem.name}
             </h3>
             <div className="space-y-5">
+              {/* Pizza/Pasta Size Selection */}
               {(optionsModalItem.category?.toLowerCase().includes("pizza") ||
                 optionsModalItem.category?.toLowerCase().includes("pasta")) && (
                 <div>
@@ -456,39 +471,103 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
                 </div>
               )}
 
-              {optionsModalItem.category?.toLowerCase().includes("drink") && (
-                <div>
-                  <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
-                    Choose Volume
+              {/* Drink Volume/Size Selection */}
+              {(optionsModalItem.category?.toLowerCase().includes("drink") ||
+                optionsModalItem.hasSizeOptions) &&
+                optionsModalItem.sizes && (
+                  <div>
+                    <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
+                      Choose Size *
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      {optionsModalItem.sizes.map((size) => (
+                        <button
+                          key={size.key}
+                          onClick={() => setSelectedSize(size.key)}
+                          className={`w-full border-2 rounded-lg px-4 py-3.5 text-left transition-all ${
+                            selectedSize === size.key
+                              ? "border-orange-500 bg-orange-50"
+                              : "border-gray-200 hover:border-orange-300 hover:bg-orange-50"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-gray-800">
+                              {size.label}
+                            </span>
+                            <span className="text-orange-600 font-bold">
+                              Rs {size.price.toLocaleString("en-PK")}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-3">
-                    {drinkVolumes.map((v) => (
-                      <button
-                        key={v.key}
-                        onClick={() => setSelectedSize(v.key)}
-                        className={`w-full border-2 rounded-lg px-4 py-3.5 text-left transition-all ${
-                          selectedSize === v.key
-                            ? "border-orange-500 bg-orange-50"
-                            : "border-gray-200 hover:border-orange-300 hover:bg-orange-50"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-gray-800">
-                            {v.label}
-                          </span>
-                          <span className="text-orange-600 font-bold">
-                            Rs{" "}
-                            {Math.round(
-                              optionsModalItem.price * v.multiplier
-                            ).toLocaleString("en-PK")}
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                )}
 
+              {/* Old Drink Volume Selection (fallback for items without sizes array) */}
+              {optionsModalItem.category?.toLowerCase().includes("drink") &&
+                !optionsModalItem.sizes && (
+                  <div>
+                    <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
+                      Choose Volume *
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      {drinkVolumes.map((v) => (
+                        <button
+                          key={v.key}
+                          onClick={() => setSelectedSize(v.key)}
+                          className={`w-full border-2 rounded-lg px-4 py-3.5 text-left transition-all ${
+                            selectedSize === v.key
+                              ? "border-orange-500 bg-orange-50"
+                              : "border-gray-200 hover:border-orange-300 hover:bg-orange-50"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-gray-800">
+                              {v.label}
+                            </span>
+                            <span className="text-orange-600 font-bold">
+                              Rs{" "}
+                              {Math.round(
+                                optionsModalItem.price * v.multiplier
+                              ).toLocaleString("en-PK")}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Brand Selection for Drinks */}
+              {optionsModalItem.hasBrandOptions &&
+                optionsModalItem.brands &&
+                optionsModalItem.brands.length > 0 && (
+                  <div>
+                    <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
+                      Choose Brand *
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {optionsModalItem.brands.map((brand) => (
+                        <button
+                          key={brand.name}
+                          onClick={() => setSelectedBrand(brand.name)}
+                          className={`border-2 rounded-lg px-4 py-3.5 text-center transition-all ${
+                            selectedBrand === brand.name
+                              ? "border-orange-500 bg-orange-50"
+                              : "border-gray-200 hover:border-orange-300 hover:bg-orange-50"
+                          }`}
+                        >
+                          <div className="font-semibold text-gray-800 text-sm">
+                            {brand.name}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Extras Selection */}
               {(optionsModalItem.category?.toLowerCase().includes("pizza") ||
                 optionsModalItem.category?.toLowerCase().includes("pasta") ||
                 optionsModalItem.category?.toLowerCase().includes("burger")) &&
@@ -523,6 +602,7 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
                   </div>
                 )}
 
+              {/* Quantity Selection */}
               <div className="flex items-center justify-between py-3 border-t border-gray-100">
                 <div className="text-sm font-bold text-gray-800 tracking-wide">
                   Quantity
@@ -548,6 +628,7 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
                 </div>
               </div>
 
+              {/* Action Buttons */}
               <div className="flex gap-3 pt-3">
                 <button
                   onClick={closeOptionsModal}
@@ -559,7 +640,7 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
                   onClick={handleConfirmOptions}
                   className="flex-1 py-3.5 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                 >
-                  Add to cart
+                  Add to Cart
                 </button>
               </div>
             </div>
