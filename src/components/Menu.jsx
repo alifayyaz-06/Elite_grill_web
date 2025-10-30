@@ -159,17 +159,19 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
       isPizza || isDrinks || isPasta || isBurgers || item.hasSizeOptions;
 
     if (needsOptions) {
-      if (isPizza || isPasta) {
-        setSelectedSize("small");
-      } else if (isDrinks && item.hasSizeOptions && item.sizes) {
+      // If item has custom sizes, use the first size
+      if (item.hasSizeOptions && item.sizes) {
         setSelectedSize(item.sizes[0].key);
+      }
+      // Otherwise use default logic for pizzas/pastas without custom sizes
+      else if (isPizza || isPasta) {
+        setSelectedSize("small");
       } else if (isDrinks) {
         setSelectedSize("reg");
       } else if (isBurgers) {
         setSelectedSize(null);
-      } else if (item.hasSizeOptions && item.sizes) {
-        setSelectedSize(item.sizes[0].key);
       }
+
       setSelectedExtras([]);
       setSelectedQuantity(1);
 
@@ -205,20 +207,20 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
     const catLower = item.category?.toLowerCase() || "";
     const isPizza = catLower.includes("pizza");
 
-    // Handle pizza/pasta sizes
-    if (isPizza || catLower.includes("pasta")) {
-      const opt = sizeOptions.find((o) => o.key === selectedSize);
-      if (opt) {
-        finalPrice = Math.round(item.price * opt.multiplier);
-        sizeLabel = opt.label;
-      }
-    }
-    // Handle drinks with custom sizes
-    else if (item.hasSizeOptions && item.sizes) {
+    // First check if item has custom sizes defined
+    if (item.hasSizeOptions && item.sizes) {
       const sizeOpt = item.sizes.find((s) => s.key === selectedSize);
       if (sizeOpt) {
         finalPrice = sizeOpt.price;
         sizeLabel = sizeOpt.label;
+      }
+    }
+    // Handle pizza/pasta sizes with multiplier (only if no custom sizes)
+    else if (isPizza || catLower.includes("pasta")) {
+      const opt = sizeOptions.find((o) => o.key === selectedSize);
+      if (opt) {
+        finalPrice = Math.round(item.price * opt.multiplier);
+        sizeLabel = opt.label;
       }
     }
     // Handle old drink volume system (fallback)
@@ -436,33 +438,29 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
               Customize — {optionsModalItem.name}
             </h3>
             <div className="space-y-5">
-              {/* Pizza/Pasta Size Selection */}
-              {(optionsModalItem.category?.toLowerCase().includes("pizza") ||
-                optionsModalItem.category?.toLowerCase().includes("pasta")) && (
+              {/* Custom Size Selection (for items with hasSizeOptions) */}
+              {optionsModalItem.hasSizeOptions && optionsModalItem.sizes && (
                 <div>
                   <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
                     Choose Size *
                   </div>
                   <div className="grid grid-cols-1 gap-3">
-                    {sizeOptions.map((opt) => (
+                    {optionsModalItem.sizes.map((size) => (
                       <button
-                        key={opt.key}
-                        onClick={() => setSelectedSize(opt.key)}
+                        key={size.key}
+                        onClick={() => setSelectedSize(size.key)}
                         className={`w-full border-2 rounded-lg px-4 py-3.5 text-left transition-all ${
-                          selectedSize === opt.key
+                          selectedSize === size.key
                             ? "border-orange-500 bg-orange-50"
                             : "border-gray-200 hover:border-orange-300 hover:bg-orange-50"
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-gray-800">
-                            {opt.label}
+                            {size.label}
                           </span>
                           <span className="text-orange-600 font-bold">
-                            Rs{" "}
-                            {Math.round(
-                              optionsModalItem.price * opt.multiplier
-                            ).toLocaleString("en-PK")}
+                            Rs {size.price.toLocaleString("en-PK")}
                           </span>
                         </div>
                       </button>
@@ -471,31 +469,36 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
                 </div>
               )}
 
-              {/* Drink Volume/Size Selection */}
-              {(optionsModalItem.category?.toLowerCase().includes("drink") ||
-                optionsModalItem.hasSizeOptions) &&
-                optionsModalItem.sizes && (
+              {/* Pizza/Pasta Size Selection (only if no custom sizes) */}
+              {!optionsModalItem.hasSizeOptions &&
+                (optionsModalItem.category?.toLowerCase().includes("pizza") ||
+                  optionsModalItem.category
+                    ?.toLowerCase()
+                    .includes("pasta")) && (
                   <div>
                     <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
                       Choose Size *
                     </div>
                     <div className="grid grid-cols-1 gap-3">
-                      {optionsModalItem.sizes.map((size) => (
+                      {sizeOptions.map((opt) => (
                         <button
-                          key={size.key}
-                          onClick={() => setSelectedSize(size.key)}
+                          key={opt.key}
+                          onClick={() => setSelectedSize(opt.key)}
                           className={`w-full border-2 rounded-lg px-4 py-3.5 text-left transition-all ${
-                            selectedSize === size.key
+                            selectedSize === opt.key
                               ? "border-orange-500 bg-orange-50"
                               : "border-gray-200 hover:border-orange-300 hover:bg-orange-50"
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <span className="font-semibold text-gray-800">
-                              {size.label}
+                              {opt.label}
                             </span>
                             <span className="text-orange-600 font-bold">
-                              Rs {size.price.toLocaleString("en-PK")}
+                              Rs{" "}
+                              {Math.round(
+                                optionsModalItem.price * opt.multiplier
+                              ).toLocaleString("en-PK")}
                             </span>
                           </div>
                         </button>
@@ -505,8 +508,8 @@ export default function Menu({ onAddToCart, cartItems = [] }) {
                 )}
 
               {/* Old Drink Volume Selection (fallback for items without sizes array) */}
-              {optionsModalItem.category?.toLowerCase().includes("drink") &&
-                !optionsModalItem.sizes && (
+              {!optionsModalItem.hasSizeOptions &&
+                optionsModalItem.category?.toLowerCase().includes("drink") && (
                   <div>
                     <div className="text-sm font-bold text-gray-800 mb-3 tracking-wide">
                       Choose Volume *

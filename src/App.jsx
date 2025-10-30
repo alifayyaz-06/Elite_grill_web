@@ -25,22 +25,25 @@ function App() {
   }, []);
 
   // Cart functions
-  const addToCart = (item) => {
-    const exists = cartItems.find((i) => i.id === item.id);
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
-      if (existingItem) {
-        return prevItems.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      } else {
-        return [...prevItems, { ...item, quantity: 1 }];
-      }
-    });
-    // Trigger toast outside updater to avoid StrictMode double invoke
-    toast.success(`${item.name || item.title || "Item"} added to cart`);
-  };
-
+const addToCart = (item) => {
+  const exists = cartItems.find((i) => i.id === item.id);
+  setCartItems((prevItems) => {
+    const existingItem = prevItems.find((i) => i.id === item.id);
+    if (existingItem) {
+      // Add the quantity from the item (which comes from modal)
+      return prevItems.map((i) =>
+        i.id === item.id
+          ? { ...i, quantity: i.quantity + (item.quantity || 1) }
+          : i
+      );
+    } else {
+      // Use the quantity from item, or default to 1
+      return [...prevItems, { ...item, quantity: item.quantity || 1 }];
+    }
+  });
+  // Trigger toast outside updater to avoid StrictMode double invoke
+  toast.success(`${item.name || item.title || "Item"} added to cart`);
+};
   const updateQuantity = (itemId, newQuantity) => {
     if (newQuantity <= 0) {
       removeFromCart(itemId);

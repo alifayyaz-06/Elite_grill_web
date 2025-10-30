@@ -234,67 +234,97 @@ const fullMenu = {
       id: "crown-crust-pizza",
       name: "Crown Crust Pizza",
       description: "Special crown crust with cheese",
-      price: 1375,
+      price: 1100,
       image:
         "https://res.cloudinary.com/dfulvmass/image/upload/w_500,h_500,c_fill,q_auto,f_auto/v1761852349/crown_crust_page-0001_vfvihv.jpg",
       rating: 4.8,
       time: "20-35 min",
       popular: true,
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1100 },
+        { label: "Large", key: "large", price: 1650 },
+      ],
     },
     {
       id: "pepperoni-pizza",
       name: "Pepperoni Pizza",
       description: "Classic pepperoni lovers",
-      price: 1375,
+      price: 1100,
       image:
         "https://res.cloudinary.com/dfulvmass/image/upload/w_500,h_500,c_fill,q_auto,f_auto/v1761854562/240_F_18669964_Txz4BS0OErzj9v9DHM3N51d8yFVa85dR_prpppe.jpg",
       rating: 4.8,
       time: "20-35 min",
       popular: true,
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1100 },
+        { label: "Large", key: "large", price: 1650 },
+      ],
     },
     {
       id: "mexican-pizza",
       name: "Mexican Pizza",
       description: "Spicy Mexican flavors",
-      price: 1375,
+      price: 1100,
       image:
         "https://res.cloudinary.com/dfulvmass/image/upload/w_500,h_500,c_fill,q_auto,f_auto/v1761854559/240_F_34033689_j9NkSwovaFuXEXbXozTpfcoDOBQyMmZv_xybygi.jpg",
       rating: 4.7,
       time: "20-35 min",
       spicy: true,
       popular: true,
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1100 },
+        { label: "Large", key: "large", price: 1650 },
+      ],
     },
     {
       id: "peri-peri-pizza",
       name: "Peri Peri Pizza",
       description: "Hot peri peri chicken",
-      price: 1375,
+      price: 1100,
       image:
         "https://res.cloudinary.com/dfulvmass/image/upload/w_500,h_500,c_fill,q_auto,f_auto/v1761854549/240_F_341406883_m5vQbDROgAXLrKhbXMBLXIzaWyb8u13X_nbwzex.jpg",
       rating: 4.7,
       time: "20-35 min",
       spicy: true,
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1100 },
+        { label: "Large", key: "large", price: 1650 },
+      ],
     },
     {
       id: "behari-kabab-pizza",
       name: "Behari Kabab Pizza",
       description: "Behari kabab special",
-      price: 1375,
+      price: 1100,
       image:
         "https://res.cloudinary.com/dfulvmass/image/upload/w_500,h_500,c_fill,q_auto,f_auto/v1761819455/royal-kabab-crust_rj15l7.jpg",
       rating: 4.8,
       time: "20-35 min",
       popular: true,
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1100 },
+        { label: "Large", key: "large", price: 1650 },
+      ],
     },
     {
       id: "kababish-pizza",
       name: "Kababish Pizza",
       description: "Mix kabab pizza",
-      price: 1375,
+      price: 1100,
       image:
         "https://res.cloudinary.com/dfulvmass/image/upload/w_500,h_500,c_fill,q_auto,f_auto/v1761854548/240_F_639566464_cpjsYILH9cx9dHPmNpS3d8QU0hGsH0j5_urap1f.jpg",
       rating: 4.7,
       time: "20-35 min",
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1100 },
+        { label: "Large", key: "large", price: 1650 },
+      ],
     },
   ],
 
@@ -309,6 +339,11 @@ const fullMenu = {
       rating: 4.9,
       time: "25-40 min",
       popular: true,
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1600 },
+        { label: "Large", key: "large", price: 2000 },
+      ],
     },
     {
       id: "malai-boti-pizza",
@@ -320,6 +355,11 @@ const fullMenu = {
       rating: 4.9,
       time: "25-40 min",
       popular: true,
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1600 },
+        { label: "Large", key: "large", price: 2000 },
+      ],
     },
     {
       id: "chicken-kabab-pizza",
@@ -331,6 +371,11 @@ const fullMenu = {
       rating: 4.8,
       time: "25-40 min",
       popular: true,
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1600 },
+        { label: "Large", key: "large", price: 2000 },
+      ],
     },
     {
       id: "beef-kabab-pizza",
@@ -341,6 +386,11 @@ const fullMenu = {
         "https://res.cloudinary.com/dfulvmass/image/upload/w_600,q_auto,f_auto/v1761819464/mughlai-pizza_d4sxqy.jpg",
       rating: 4.8,
       time: "25-40 min",
+      hasSizeOptions: true,
+      sizes: [
+        { label: "Medium", key: "medium", price: 1600 },
+        { label: "Large", key: "large", price: 2000 },
+      ],
     },
   ],
 
