@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 
 export default function ImageSlideshow() {
   const images = [
-    "/img/img1.png",
-"https://res.cloudinary.com/dfulvmass/image/upload/w_1980,q_60,f_auto/v1761888108/FAJITA_PIZZA_de5tda.png",
-    " https://res.cloudinary.com/dfulvmass/image/upload/w_1980,q_60,f_auto/v1761888085/img00_nopbhc.png",
-    "/img/img3.png",
+    "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/img3_f3vuy3.png",
+"https://res.cloudinary.com/dfulvmass/image/upload/w_1580,q_60,f_auto/v1761888108/FAJITA_PIZZA_de5tda.png",
+    " https://res.cloudinary.com/dfulvmass/image/upload/w_1580,q_60,f_auto/v1761888085/img00_nopbhc.png",
+    "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/img1_wj4t9e.png",
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);

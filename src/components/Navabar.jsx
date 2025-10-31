@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { Menu, X, ShoppingCart, User, Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import addOnItems from "../data/menuData";
 import fullMenu from "../data/fullMenu";
 
 // ✅ Drawer-style Cart Modal
