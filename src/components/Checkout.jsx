@@ -117,32 +117,49 @@ export default function Checkout({ cartItems = [], onClearCart, onAddToCart }) {
     navigate("/");
   };
 
-  const handleWhatsAppOrder = () => {
-    if (total < MIN_ORDER) {
-      toast.error(`Minimum order is Rs ${MIN_ORDER}`);
-      return;
-    }
-    const number = import.meta.env.VITE_WHATSAPP_NUMBER || "923120644468"; // e.g., 92300XXXXXXX
-    const lines = [
-      "New Order via WhatsApp:",
-      `Name: ${customer.name}`,
-      `Phone: ${customer.phone}`,
-      `Method: ${customer.method}`,
-      `Payment: ${customer.payment}`,
-      `Address: ${address}`,
-      "Items:",
-      ...cartItems.map(
-        (i) =>
-          `- ${i.name} x${i.quantity} = Rs ${(
-            i.price * i.quantity
-          ).toLocaleString("en-PK")}`
-      ),
-      `Total: Rs ${total.toLocaleString("en-PK")}`,
-    ];
-    const text = encodeURIComponent(lines.join("\n"));
-    const url = `https://wa.me/${number}?text=${text}`;
-    window.open(url, "_blank");
-  };
+ const handleWhatsAppOrder = async () => {
+   if (total < MIN_ORDER) {
+     toast.error(`Minimum order is Rs ${MIN_ORDER}`);
+     return;
+   }
+
+   const number = import.meta.env.VITE_WHATSAPP_NUMBER || "923120644468"; // e.g., 92300XXXXXXX
+   const lines = [
+     "New Order via WhatsApp:",
+     `Name: ${customer.name}`,
+     `Phone: ${customer.phone}`,
+     `Method: ${customer.method}`,
+     `Payment: ${customer.payment}`,
+     `Address: ${address}`,
+     "Items:",
+     ...cartItems.map(
+       (i) =>
+         `- ${i.name} x${i.quantity} = Rs ${(
+           i.price * i.quantity
+         ).toLocaleString("en-PK")}`
+     ),
+     `Total: Rs ${total.toLocaleString("en-PK")}`,
+   ];
+   const text = encodeURIComponent(lines.join("\n"));
+   const url = `https://wa.me/${number}?text=${text}`;
+   window.open(url, "_blank");
+
+   // 🟢 Send backend confirmation (Twilio)
+   try {
+     await fetch("/api/sendConfirm", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ customer, total }),
+     });
+   } catch (err) {
+     console.error("WhatsApp confirmation failed:", err);
+   }
+
+   toast.success("Order placed successfully!");
+   if (onClearCart) onClearCart();
+   navigate("/");
+ };
+
 
   const handleAddAddon = (addon) => {
     const item = {
