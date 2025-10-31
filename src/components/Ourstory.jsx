@@ -26,7 +26,8 @@ export default function OurStory() {
         {/* Image (Right side) */}
         <div className="flex justify-center md:justify-end">
           <img
-            src="/img/img9.png"
+            src="https://res.cloudinary.com/dfulvmass/image/upload/w_600,q_60,f_auto/v1761889801/img9_lr60q1.png
+"
             alt="Our Story"
             className="w-72 h-56 sm:w-96 sm:h-72 object-cover rounded-lg shadow-lg"
           />

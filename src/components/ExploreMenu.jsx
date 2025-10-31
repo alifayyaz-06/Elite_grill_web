@@ -19,7 +19,8 @@ const menuItems = [
   {
     id: 3,
     name: "Sandwiches",
-    img: "/images/shawarmas/zinger-shawarma.jpg",
+    img: "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/v1761850954/WhatsApp_Image_2025-10-25_at_15.45.43_93ccd133_roccsk.jpg",
+
     categoryId: "burgers",
   },
   {
@@ -32,7 +33,7 @@ const menuItems = [
   {
     id: 5,
     name: "Sides & Drinks",
-    img: "/images/beverages/sprite.jpeg",
+    img: "https://res.cloudinary.com/dfulvmass/image/upload/f_auto,q_auto,w_800/v1761853662/240_F_414029990_XCARjrhzjnxaFIf1xBbNLKCQpbbUEoTc_h3p4xq.jpg",
     categoryId: "drinks",
   },
 ];
