@@ -532,7 +532,7 @@ export default function Navabar({
               </div>
               <div
                 onClick={() => {
-                  navigate("/Footer");
+                  navigate("/");
                   setIsMenuOpen(false);
                 }}
                 className="flex items-center space-x-2 px-2 py-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"

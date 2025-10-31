@@ -106,6 +106,7 @@ const addToCart = (item) => {
           element={<Checkout cartItems={cartItems} onClearCart={clearCart} />}
         />
       </Routes>
+ 
     </Router>
   );
 }

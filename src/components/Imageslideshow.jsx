@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 
 export default function ImageSlideshow() {
   const images = [
-    "https://res.cloudinary.com/dfulvmass/image/upload/w_600,q_auto,f_auto/v1761856306/Gemini_Generated_Image_s2c0d4s2c0d4s2c0_kvxyj1.png",
-    "https://res.cloudinary.com/dfulvmass/image/upload/w_600,q_auto,f_auto/v1761856301/Gemini_Generated_Image_qj8fu2qj8fu2qj8f_ipbou6.png",
-    " /img/img1.png",
+    "/img/img1.png",
+"https://res.cloudinary.com/dfulvmass/image/upload/w_1980,q_60,f_auto/v1761888108/FAJITA_PIZZA_de5tda.png",
+    " https://res.cloudinary.com/dfulvmass/image/upload/w_1980,q_60,f_auto/v1761888085/img00_nopbhc.png",
     "/img/img3.png",
   ];
 
